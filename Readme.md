@@ -16,11 +16,11 @@ Yong-Xiang Lin, Daniel Tan, Wen-Huang Cheng, Yung-Yao Chen, Kai-Lung Hua. “Spa
 
 ## Example Results
 
-![./figure/Output.png]
+![figure/Output.png]
 
 ## Model Architecture
 
-![./figure/Overview.png]
+![figure/Overview.png]
 
 ## Prerequisites
 - Python 3
@@ -81,7 +81,7 @@ python compute_iou.py ./data/Cityscapes/data/gtFine/val result/cityscapes
 
 Firstly, Using [FastPhotoStyle], transfer GTA5 dataset to Cityscapes photo style.
 
-![./figure/FastphotoDemo.png]
+![figure/FastphotoDemo.png]
 
 Second, 
 * Train the GTA5-to-Cityscapes model - 
