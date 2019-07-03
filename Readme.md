@@ -14,6 +14,9 @@ Yong-Xiang Lin, Daniel Stanley Tan, Wen-Huang Cheng, Kai-Lung Hua. “Adapting S
 
 Yong-Xiang Lin, Daniel Tan, Wen-Huang Cheng, Yung-Yao Chen, Kai-Lung Hua. “Spatially-aware Domain Adaptation for Semantic Segmentatino of Urban Scenes,” In Proceedings of the IEEE International Conference on Image Processing (ICIP), Taipei, Taiwan, September 22-25, 2019. (Oral)
 
+## Todo
+- [ ] Add Spatially-aware Domain Adaptation training code
+- [ ] Release the Gated pretrain model
 ## Example Results
 
 ![](figure/Output.png)
@@ -33,8 +36,18 @@ Yong-Xiang Lin, Daniel Tan, Wen-Huang Cheng, Yung-Yao Chen, Kai-Lung Hua. “Spa
 #### You can choose [pip install / conda install by yml]()
 * #### Intall method 1. use pip 
     - Install PyTorch and dependencies from http://pytorch.org
+    - Install below librarys
+    Note: 
+    > dominate - visualizing on the web page,
+    tenserflow - recording logs
     ```bash
-    pip install dominate, scipy, matplotlib, pillow, pyyaml
+    pip install dominate
+    pip install scipy
+    pip install matplotlib
+    pip install pillow
+    pip install pyyaml
+    pip install opencv-python
+    pip install tensorflow
     ```
 * ####  Intall method 2. use conda env 
     ```bash
@@ -64,7 +77,7 @@ cd Gated-AdaptSeg
 * Download the [Cityscapes Dataset](https://www.cityscapes-dataset.com/) as the target domain, and put it in the `data/Cityscapes` folder
 
 ## Testing
-* Download the Gated pre-trained model [link](https://drive.google.com/file/d/1Sft6duJcgciJ2fR0oQMzf9eUt5Tinjz9/view)
+<!-- * Download the Gated pre-trained model [link](https://drive.google.com/file/d/1Fux5YZ1j8p-hhGL1cn0s3ztMMSHKqirp/view?usp=sharing) -->
 
 Note: This version classification only use ASPP Module [6, 12]，Similar as [AdaptSegNet]
 
@@ -128,6 +141,7 @@ In ECCV 2018 paper <br/>
 ## Note
 The model and code are available for non-commercial research purposes only.
 * May, 05, 2019: Add readme.txt
+* Jul, 04, 2019: Add training code - Gated-AdaptSeg
 
 [AdaptSegNet]:https://github.com/wasidennis/AdaptSegNet
 [FastPhotoStyle]:https://github.com/NVIDIA/FastPhotoStyle
