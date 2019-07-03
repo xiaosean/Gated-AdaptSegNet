@@ -1,0 +1,16 @@
+*.pyc
+*.pth
+.idea
+.ipynb_checkpoints
+/demo_image_result
+/training_image_result
+/check_output
+/data
+/labels
+/web
+/my_test_img
+/check_output
+/result
+/result_multi
+/model/GTA2Cityscapes_multi
+/model/GTA2Cityscapes_single
