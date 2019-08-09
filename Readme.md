@@ -1,7 +1,5 @@
 # Domain Adapt for Semantic Segmentation
 
-## Code will be avaliable in July. Currently, I am working on the journal version.
-
 Pytorch implementation domain adaption of semantic segmentation from the synthetic dataset (source domain) to the real dataset (target domain). Based on [AdaptSegNet].
 
 Contact: Yong-Xiang Lin (xiaosean5408 at gmail dot com)
