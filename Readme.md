@@ -7,7 +7,7 @@ Contact: Yong-Xiang Lin (xiaosean5408 at gmail dot com)
 ## Download
 You can download the 
 Paper and Pre-trained weight at here!
-[Gated-AdaptSegNet-Material]:https://drive.google.com/open?id=1-ZNSGbxZqUYpRfWeFlxANBF0XTZ-9fbk
+[Gated-AdaptSegNet-Material](https://drive.google.com/open?id=1-ZNSGbxZqUYpRfWeFlxANBF0XTZ-9fbk)
 
 ## Paper
 
@@ -130,7 +130,7 @@ tensorboard --logdir=check_output\log --host=127.0.0.1
 Using model/gated_discriminator
 > Yong-Xiang Lin, Daniel Stanley Tan, Wen-Huang Cheng, Kai-Lung Hua. “Adapting Semantic Segmentation of Urban Scenes via Mask-aware Gated Discriminator,” In Proceedings of the IEEE International Conference on Multimedia & Expo (ICME), Shanghai, China, Jul. 8 - 12, 2019. (Oral)
 
-Using model/sp_cgan_discriminator and download the spatial prior from GTA5.
+Using model/spatial_prior_discriminator and download the spatial prior from GTA5.
 
 Spatial prior download go to ECCV'18 [cbst] download the Spatial prior:[Spatial prior brrowed from cbst]
 
