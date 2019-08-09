@@ -1,6 +1,6 @@
 # logger options
-name: Gated
-test_summary: ICME'19 versoin
+name: Spatail
+test_summary: ICIP'19 version
 log_iter: 1                   # How often do you want to log the training stats
 snapshot_save_iter: 10000     # How often do you want to save trained models
 snapshot_save_dir: ./snapshots/GTA2Cityscapes_multi/
@@ -9,7 +9,7 @@ image_save_dir: ./check_output/ #each image_save_iter epochs will show image, ca
 checkpoints_dir: ./check_output
 web_dir: ./web
 log_dir: ./check_output/log
-d_model: Gated
+d_model: Spatail
 
 # optimization options
 num_steps: 250000    # maximum number of training iterations
@@ -19,15 +19,15 @@ decay_power: 0.9
 random_seed: 1234
 momentum: 0.9
 weight_decay: 0.0005          # weight decay
-beta1: 0.                    # Adam parameter
-beta2: 0.999                  # Adam parameter
-D_beta1: 0                    # Adam parameter
+beta1: 0.9                 # Adam parameter
+beta2: 0.99                  # Adam parameter
+D_beta1: 0.9                    # Adam parameter
 D_beta2: 0.999                  # Adam parameter
 lr_g: 0.00025                    # initial learning rate SGD
-lr_d: 0.001                    # initial learning rate Adam
+lr_d: 0.0001                    # initial learning rate Adam
 
 # model options
-model: DeepLabEdge
+model: DeepLabMulti
 g_model: default
 restore: true
 restore_from: http://vllab.ucmerced.edu/ytsai/CVPR18/DeepLab_resnet_pretrained_init-f81d91e8.pth
@@ -42,10 +42,10 @@ gen:
   lambda_adv_foreground: 2
 
 dis:
-  adv_loss_opt: hinge  # [wgan-gp / hinge / bce]
+  adv_loss_opt: bce  # [wgan-gp / hinge / bce]
   input_as_global_dis_features: False
   input_as_foreground_dis_features: False
-  mask_as_foreground_dis_features: True
+  mask_as_foreground_dis_features: False
 
 
 # data options

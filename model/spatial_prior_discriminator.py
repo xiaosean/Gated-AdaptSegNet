@@ -1,69 +1,86 @@
-import torch as torch
+import os
+
+import torch
 import torch.nn as nn
 from torch.nn.utils import spectral_norm
+import scipy.io as sio
+import numpy as np
 
-class Spatial_Prior_Discriminator(nn.Module):
+from util.util import weights_init
+
+
+class SP_Prior_FCDiscriminator(nn.Module):
 
     def __init__(self, num_classes, ndf=64):
-        super(Spatial_Prior_Discriminator, self).__init__()
+        super(SP_Prior_FCDiscriminator, self).__init__()
+        self.foreground_map = [5, 6, 7, 11, 12, 13, 14, 15, 16, 17, 18]
+        n = len(self.foreground_map)
+        self.gamma = nn.Parameter(torch.zeros(n))
+        self.conv1 = spectral_norm(nn.Conv2d(num_classes, ndf, kernel_size=4, stride=2, padding=1))
+        self.conv2 = spectral_norm(nn.Conv2d(ndf, ndf * 2, kernel_size=4, stride=2, padding=1))
+        self.conv3 = spectral_norm(nn.Conv2d(ndf * 2, ndf * 4, kernel_size=4, stride=2, padding=1))
+        self.conv4 = spectral_norm(nn.Conv2d(ndf * 4, ndf * 8, kernel_size=4, stride=2, padding=1))
 
-        self.gamma = nn.Parameter(torch.zeros(1))
+        self.fc = [spectral_norm(nn.Linear(ndf * 8, 1))]
+        self.fc = nn.Sequential(*self.fc)
+        weights_init(self.fc)
 
-        # ==================== #
-        #    model pre         #
-        # ==================== #
-        self.model_pre = []
-        # # channe = 64
-        self.model_pre += [spectral_norm(nn.Conv2d(num_classes, ndf, 4, 2, 1))]
-        self.model_pre += [nn.LeakyReLU(0.2)]
-        # # # channe = 128
-        self.model_pre += [spectral_norm(nn.Conv2d(ndf, ndf * 2, 4, 2, 1))]
-        self.model_pre += [nn.LeakyReLU(0.2)]
-        # # # channe = 256
-        self.model_pre += [spectral_norm(nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1))]
-        self.model_pre += [nn.LeakyReLU(0.2)]
+        self.spatial_matrix = self.get_spatial_matrix()
+        C, H, W = self.spatial_matrix.shape
+        self.spatial_matrix = self.spatial_matrix.view(1, C, H, W)
 
-        # use cGANs with projection
-        # ==================== #
-        #   proj conv          #
-        # ==================== #
+
         self.proj_conv = []
-        self.proj_conv += [spectral_norm(nn.Conv2d(ndf * 4, 1, kernel_size=3, stride=1, padding=1))]
-        self.model_block = []
+        self.proj_conv += [spectral_norm(nn.Conv2d(ndf, n, kernel_size=3, stride=1, padding=1))]
 
-        # channel = 512
-        self.model_block += [spectral_norm(nn.Conv2d(ndf*4, ndf*8, 4, 2, 1))]
-        self.model_block += [nn.LeakyReLU(0.2)]
-
-        self.model_block_out_size = ndf*8
-        # ==================== #
-        #          fc          #
-        # ==================== #
-        # self.fc = nn.Linear(ndf * 8, 1)
-        self.fc = spectral_norm(nn.Linear(self.model_block_out_size, 1))
-
-        # ==================== #
-        #     model_classifier #
-        # ==================== #
-        # create model
-        self.model_pre = nn.Sequential(*self.model_pre)
-        self.model_block = nn.Sequential(*self.model_block)
         self.proj_conv = nn.Sequential(*self.proj_conv)
 
-    def forward(self, x, label=None):
-        assert label is not None, "plz give me label let me train discriminator"
-        x = self.model_pre(x)
+        self.leaky_relu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
+        self.activation = self.leaky_relu
 
-        proj_x = self.proj_conv(x)
+    def get_spatial_matrix(self, path="./model/prior_array.mat"):
+        if not os.path.exists(path):
+            raise FileExistsError("please put the spatial prior in .model/ \nThis prior comes from Yang Zou*, Zhiding Yu*, Vijayakumar Bhagavatula, Jinsong Wang. Domain Adaptation for Semantic Segmentation via Class-Balanced Self-Training. In ECCV'18 \nYou can download the prior at: https://www.dropbox.com/s/o6xac8r3z30huxs/prior_array.mat?dl=0")
+        sprior = sio.loadmat(path)
+        sprior = sprior["prior_array"]
+        sprior = sprior[self.foreground_map]
+        tensor_sprior = torch.tensor(sprior,
+                                     dtype=torch.float64,
+                                     device=torch.device('cuda:0')).float().cuda()
+        return tensor_sprior
 
-        x = self.model_block(x)
-        # global sum pooling
+    def forward(self, input):
+
+        x = self.conv1(input)
+        x = self.activation(x)
+        proj = self.proj_conv(x)
+        proj_shape = proj.shape
+        x = self.conv2(x)
+        x = self.activation(x)
+        x = self.conv3(x)
+        x = self.activation(x)
+
+        # =================
+        # project part
+        # =================
+
+        interp = nn.Upsample(size=proj_shape[-2:], align_corners=True, mode='bilinear')
+        spatial_matrix = interp(self.spatial_matrix)
+        input_foreground = input[:, self.foreground_map]
+        input_foreground_resize = interp(input_foreground).detach()
+
+        spatial_info = (1 + spatial_matrix) * input_foreground_resize
+        proj = proj * spatial_info
+        proj = torch.sum(proj, dim=(2, 3))
+
+        # =================
+        # block
+        # =================
+        x = self.conv4(x)
+        x = self.activation(x)
+
         x = torch.sum(x, dim=(2, 3))
+        x = self.fc(x)
+        x = x + proj
 
-        x = x.view(-1, self.model_block_out_size)
-        output = self.fc(x)
-        output += self.gamma*torch.sum(proj_x*label)
-
-        return output, proj_x
-
-
+        return x

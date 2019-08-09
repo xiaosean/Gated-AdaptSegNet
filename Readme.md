@@ -6,6 +6,11 @@ Pytorch implementation domain adaption of semantic segmentation from the synthet
 
 Contact: Yong-Xiang Lin (xiaosean5408 at gmail dot com)
 
+## Download
+You can download the 
+Paper and Pre-trained weight at here!
+[Gated-AdaptSegNet-Material]:https://drive.google.com/open?id=1-ZNSGbxZqUYpRfWeFlxANBF0XTZ-9fbk
+
 ## Paper
 
 Please cite our paper if you find it is useful for your research.
@@ -15,8 +20,10 @@ Yong-Xiang Lin, Daniel Stanley Tan, Wen-Huang Cheng, Kai-Lung Hua. “Adapting S
 Yong-Xiang Lin, Daniel Tan, Wen-Huang Cheng, Yung-Yao Chen, Kai-Lung Hua. “Spatially-aware Domain Adaptation for Semantic Segmentatino of Urban Scenes,” In Proceedings of the IEEE International Conference on Image Processing (ICIP), Taipei, Taiwan, September 22-25, 2019. (Oral)
 
 ## Todo
-- [ ] Add Spatially-aware Domain Adaptation training code
-- [ ] Release the Gated pretrain model
+- [x] Add Spatially-aware Domain Adaptation training code
+- [x] Release the Gated/Spatial pretrain model
+- [ ] Reproduce Gated/Spatial result.
+
 ## Example Results
 
 ![](figure/Output.png)
@@ -84,7 +91,7 @@ Note: This version classification only use ASPP Module [6, 12]，Similar as [Ada
 ```
 python evaluate_cityscapes.py --restore-from ./Gated-GTA5-Cityscapes_250000.pth
 
-python evaluate_cityscapes.py --restore-from ./Spatial-GTA5-Cityscapes_250000.pth
+python evaluate_cityscapes.py --spatial --restore-from ./Spatial-GTA5-Cityscapes_250000.pth
 ```
 
 * Compute the IoU on Cityscapes (thanks to the code from [VisDA Challenge](http://ai.bu.edu/visda-2017/))
@@ -100,10 +107,17 @@ Firstly, Using [FastPhotoStyle], transfer GTA5 dataset to Cityscapes photo style
 
 Second, 
 * Train the GTA5-to-Cityscapes model - 
-    * Config use => configs/edge_TTUR_v1.yaml
-```
+    * Config use => configs/default.yaml
+```bash
 python train.py
 ```
+Note: if you want to reproduce ICIP version
+```bash
+python train.py --config ./configs/Spatial-ICIP-version.yaml
+```
+
+Note: if you have out of memory issue, probably use single-level training way, currently is multi-level training. You can check this paper to find out the difference between them. [Learning to Adapt Structured Output Space for Semantic Segmentation](https://arxiv.org/abs/1802.10349)
+
 
 ## Visulization
 Open ./check_output/index.html

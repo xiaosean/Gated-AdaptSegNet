@@ -9,7 +9,7 @@ Code style modify Modify from MUNIT
 
 Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 """
-
+import argparse
 import os
 import time
 from collections import OrderedDict
@@ -20,17 +20,28 @@ import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 
 from trainer import AdaptSeg_Edge_Aux_Trainer
-from util.util import get_all_data_loaders, get_config, get_cityscapes_valid_dataloader
+from trainer_spatial import AdaptSeg_Multi_Trainer
+from util.util import get_all_data_loaders, get_config
 from util.visualizer import Visualizer
 
+def get_arguments():
+    """Parse all the arguments provided from the CLI.
+
+    Returns:
+      A list of parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="DeepLab-ResNet Network")
+    parser.add_argument("--config", type=str, default="./configs/default.yaml",
+                        help="available options : DeepLab")
+    return parser.parse_args()
 
 def main():
-
+    args = get_arguments()
     # cuda setting
     cudnn.enabled = True
     cudnn.benchmark = True
     # config setting
-    CONFIG_PATH = "./configs/default.yaml"
+    CONFIG_PATH = args.config
 
     config = get_config(CONFIG_PATH)
 
@@ -58,7 +69,13 @@ def main():
     train_loader, target_loader = get_all_data_loaders(config)
 
     # model init
-    trainer = AdaptSeg_Edge_Aux_Trainer(config)
+    print("config[d_model] =", config["d_model"])
+    if config["d_model"] == "Spatail":  # ICIP version
+        print("ICIP version")
+        trainer = AdaptSeg_Multi_Trainer(config)
+    else:  # ICME version
+        print("ICME version")
+        trainer = AdaptSeg_Edge_Aux_Trainer(config)
 
     print("config[restore] =", config["restore"])
     print("config[model]  =", config["model"])
@@ -79,10 +96,10 @@ def main():
     while True:
         for i_iter, (train_batch, target_batch) in enumerate(zip(train_loader, target_loader)):
             iter_start_time = time.time()
+            torch.cuda.empty_cache()
 
             trainer.init_each_epoch(i_iter)
             trainer.update_learning_rate()
-
             # ====================== #
             #   Main training code   #
             # ====================== #
