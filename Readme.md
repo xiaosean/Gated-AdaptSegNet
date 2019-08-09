@@ -83,6 +83,8 @@ Note: This version classification only use ASPP Module [6, 12]，Similar as [Ada
 
 ```
 python evaluate_cityscapes.py --restore-from ./Gated-GTA5-Cityscapes_250000.pth
+
+python evaluate_cityscapes.py --restore-from ./Spatial-GTA5-Cityscapes_250000.pth
 ```
 
 * Compute the IoU on Cityscapes (thanks to the code from [VisDA Challenge](http://ai.bu.edu/visda-2017/))

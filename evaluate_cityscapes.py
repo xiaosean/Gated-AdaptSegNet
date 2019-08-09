@@ -4,7 +4,9 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 from torch.utils import data, model_zoo
-from model.deeplab_with_edge import Res_Deeplab
+from model.deeplab_with_edge import Res_Deeplab as Res_Deeplab_Edge
+from model.deeplab_multi import Res_Deeplab as Res_Deeplab_Multi
+
 from dataset.cityscapes_dataset import cityscapesDataSet
 import os
 from PIL import Image
@@ -60,6 +62,8 @@ def get_arguments():
                         help="choose evaluation set.")
     parser.add_argument("--save", type=str, default=SAVE_PATH,
                         help="Path to save result.")
+    parser.add_argument("--spatial", action='store_true',
+                        help="Use ICIP version - Spatial attention model.")
     return parser.parse_args()
 
 
@@ -72,8 +76,15 @@ def main():
 
     if not os.path.exists(args.save):
         os.makedirs(args.save)
-
-    model = Res_Deeplab(num_classes=args.num_classes)
+    # ICIP version
+    if args.spatial:
+        interp = nn.Upsample(size=(1024, 2048), mode='bilinear', align_corners=True)
+        model = Res_Deeplab_Multi(num_classes=args.num_classes)
+    # ICME version
+    else:
+        # TODO: USE align_corners=True can get a better result, but if u want to get the paper result, you should set FALSE
+        interp = nn.Upsample(size=(1024, 2048), mode='bilinear', align_corners=False)
+        model = Res_Deeplab_Edge(num_classes=args.num_classes)
 
     if args.restore_from[:4] == 'http' :
         saved_state_dict = model_zoo.load_url(args.restore_from)
@@ -87,7 +98,7 @@ def main():
     testloader = data.DataLoader(cityscapesDataSet(args.data_dir, args.data_list, crop_size=(1024, 512), mean=IMG_MEAN, scale=False, mirror=False, set=args.set),
                                     batch_size=1, shuffle=False, pin_memory=True)
 
-    interp = nn.Upsample(size=(1024, 2048), mode='bilinear', align_corners=True)
+
 
     with torch.no_grad():
         for index, batch in enumerate(testloader):
